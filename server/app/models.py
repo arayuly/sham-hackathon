@@ -31,6 +31,7 @@ class Document(Base):
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String, index=True)
     file_format = Column(String)  # Хранение форматов PDF, Word, TXT [cite: 101]
+    full_text = Column(Text)
     upload_time = Column(DateTime, default=datetime.datetime.utcnow)
     owner_id = Column(Integer, ForeignKey("users.id"))
 

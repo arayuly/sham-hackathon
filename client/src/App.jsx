@@ -1,28 +1,57 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
-import ResultView from "./pages/ResultView"; // Создадим этот компонент следующим шагом
+import ResultView from "./pages/ResultView";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import MainLayout from "./components/MainLayout"; // Импортируем наш Layout
+
+// Компонент для сброса скролла при переходе между страницами
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen font-sans text-gray-900">
-        {/* Базовый Header */}
-        <header className="bg-white shadow-sm p-4">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <div className="text-xl font-bold text-primary">SHAM.AI</div>
-            <div className="text-sm text-gray-500">Hackathon Prototype</div>
-          </div>
-        </header>
+    <AuthProvider>
+      <Router>
+        <ScrollToTop />
+        <Routes>
+          {/* Публичные маршруты (у них свой белый/серый дизайн для логина) */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        <main>
-          <Routes>
+          {/* Защищенные маршруты (оборачиваем в MainLayout) */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }
+          >
+            {/* Индексный роут */}
             <Route path="/" element={<Dashboard />} />
+            {/* ИСПРАВЛЕНО: убрали 's' в слове results, чтобы совпало с Dashboard */}
             <Route path="/result/:id" element={<ResultView />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+          </Route>
+
+          {/* Редирект для неизвестных адресов */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
