@@ -17,11 +17,9 @@ const Sidebar = () => {
   const lastId = localStorage.getItem('lastId') || '1';
 
   const menuItems = [
-    { id: 'Upload', label: 'Upload & Analyze', icon: <UploadCloud size={20} />, path: '/' },
+    { id: 'Upload', label: 'Upload or Select', icon: <UploadCloud size={20} />, path: '/' },
     { id: 'Dashboard', label: 'Dashboard', icon: <LayoutGrid size={20} />, path: `/result/${lastId}` },
     { id: 'AI Text Diff', label: 'AI Text Diff', icon: <FileSearch size={20} />, path: `/analysis/${lastId}` },
-    { id: 'History', label: 'Document History', icon: <History size={20} />, path: '/history' },
-    { id: 'Assistant', label: 'AI Assistant', icon: <MessageSquare size={20} />, path: '/assistant' },
     { id: 'Settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' },
   ];
 

@@ -6,7 +6,7 @@ import ResultView from "./pages/ResultView";
 import AnalysisPage from "./pages/AnalysisPage";
 import { useState, useEffect } from "react";
 import { FileText } from 'lucide-react';
-
+import FloatingAssistant from "./components/FloatingAssistant";
 function App() {
   const [currentFileName, setCurrentFileName] = useState("");
 
@@ -70,6 +70,9 @@ function App() {
           </Routes>
           </main>
         </div>
+
+        <FloatingAssistant 
+        />
 
       </div>
     </Router>

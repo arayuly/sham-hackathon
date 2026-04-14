@@ -8,7 +8,7 @@ import api from "../api";
 export default function Dashboard({onFileSelect}) {
   const [documents, setDocuments] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
 
   // Загрузка истории документов при открытии страницы
   useEffect(() => {
@@ -170,7 +170,7 @@ export default function Dashboard({onFileSelect}) {
                     <button
                       onClick={() => {
                        onFileSelect(doc.id, doc.filename);
-                        navigate(`/analysis/${doc.id}`); // Изменил на /analysis, чтобы соответствовать кнопке в Sidebar
+                        navigate(`/result/${doc.id}`); 
                       }}
                       className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 text-[13px] font-bold rounded-xl hover:bg-[#0F172A] hover:text-white hover:border-[#0F172A] transition-all shadow-sm"
                     >

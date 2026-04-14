@@ -14,10 +14,7 @@ export default function ResultView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
-  const [chatMessage, setChatMessage] = useState("");
-  const [chatHistory, setChatHistory] = useState([]);
-  const [isChatting, setIsChatting] = useState(false);
-
+  
   useEffect(() => {
     fetchAnalysis();
   }, [id]);
@@ -47,29 +44,7 @@ export default function ResultView() {
     }
   };
 
-  const sendChatMessage = async (e) => {
-    e.preventDefault();
-    if (!chatMessage.trim()) return;
-
-    const newHistory = [...chatHistory, { text: chatMessage, isBot: false }];
-    setChatHistory(newHistory);
-    setChatMessage("");
-    setIsChatting(true);
-
-    try {
-      const response = await api.post(`/documents/${id}/chat`, {
-        message: chatMessage,
-      });
-      setChatHistory([
-        ...newHistory,
-        { text: response.data.reply, isBot: true },
-      ]);
-    } catch (error) {
-      console.error("Ошибка чата:", error);
-    } finally {
-      setIsChatting(false);
-    }
-  };
+ 
 
   if (!data)
     return (
@@ -149,50 +124,8 @@ export default function ResultView() {
         </div>
       </div>
 
-      {/* Правая колонка: Чат с AI */}
-      <div className="w-full lg:w-96 bg-white border rounded-xl shadow flex flex-col h-[600px]">
-        <div className="p-4 bg-gray-50 border-b rounded-t-xl font-bold flex items-center text-primary">
-          <MessageSquare className="w-5 h-5 mr-2" /> AI-Ассистент
-        </div>
-
-        <div className="flex-1 p-4 overflow-y-auto space-y-4">
-          <div className="bg-blue-50 text-blue-900 p-3 rounded-lg rounded-tl-none text-sm">
-            Привет! Я проанализировал документ. Задайте мне любой вопрос по
-            этому ТЗ или попросите переписать конкретный пункт.
-          </div>
-          {chatHistory.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.isBot ? "justify-start" : "justify-end"}`}
-            >
-              <div
-                className={`p-3 rounded-lg text-sm max-w-[85%] ${msg.isBot ? "bg-blue-50 text-blue-900 rounded-tl-none" : "bg-primary text-white rounded-tr-none"}`}
-              >
-                {msg.text}
-              </div>
-            </div>
-          ))}
-          {isChatting && (
-            <div className="text-gray-400 text-sm italic">Печатает...</div>
-          )}
-        </div>
-
-        <form onSubmit={sendChatMessage} className="p-3 border-t flex gap-2">
-          <input
-            type="text"
-            value={chatMessage}
-            onChange={(e) => setChatMessage(e.target.value)}
-            placeholder="Спросите AI..."
-            className="flex-1 p-2 border rounded-lg focus:outline-none focus:border-primary"
-          />
-          <button
-            type="submit"
-            className="bg-primary text-white p-2 rounded-lg hover:bg-blue-700"
-          >
-            <Send className="w-5 h-5" />
-          </button>
-        </form>
-      </div>
+      
+      
     </div>
   );
 }
