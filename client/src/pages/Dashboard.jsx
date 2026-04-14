@@ -38,6 +38,7 @@ export default function Dashboard() {
           "/documents/upload-and-analyze/",
           formData,
         );
+        localStorage.setItem('lastId', response.data.document_id);
         // После успешного анализа перенаправляем на страницу результатов
         navigate(`/result/${response.data.document_id}`);
       } catch (error) {
@@ -49,6 +50,7 @@ export default function Dashboard() {
     },
     [navigate],
   );
+  
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -119,12 +121,18 @@ export default function Dashboard() {
                     {doc.score ? `${doc.score}/100` : "—"}
                   </td>
                   <td className="p-4">
-                    <button
-                      onClick={() => navigate(`/result/${doc.id}`)}
-                      className="text-primary hover:underline"
-                    >
-                      Смотреть отчет
-                    </button>
+                   <button
+                    onClick={() => {
+                     
+                      localStorage.setItem('lastId', doc.id);
+                      
+                      
+                      navigate(`/result/${doc.id}`); 
+                    }}
+                    className="text-[#10B981] font-bold hover:underline transition-all"
+                  >
+                    Смотреть анализ
+                  </button>
                   </td>
                 </tr>
               ))}

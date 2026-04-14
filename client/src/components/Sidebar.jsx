@@ -14,11 +14,12 @@ const Sidebar = () => {
   // 2. Инициализируем хуки
   const location = useLocation();
   const navigate = useNavigate();
+  const lastId = localStorage.getItem('lastId') || '1';
 
   const menuItems = [
     { id: 'Upload', label: 'Upload & Analyze', icon: <UploadCloud size={20} />, path: '/' },
-    { id: 'Dashboard', label: 'Dashboard', icon: <LayoutGrid size={20} />, path: '/dashboard' },
-    { id: 'AI Text Diff', label: 'AI Text Diff', icon: <FileSearch size={20} />, path: '/analysis/:id' },
+    { id: 'Dashboard', label: 'Dashboard', icon: <LayoutGrid size={20} />, path: `/result/${lastId}` },
+    { id: 'AI Text Diff', label: 'AI Text Diff', icon: <FileSearch size={20} />, path: `/analysis/${lastId}` },
     { id: 'History', label: 'Document History', icon: <History size={20} />, path: '/history' },
     { id: 'Assistant', label: 'AI Assistant', icon: <MessageSquare size={20} />, path: '/assistant' },
     { id: 'Settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' },
