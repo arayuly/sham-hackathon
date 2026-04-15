@@ -8,7 +8,7 @@ import {
 
 // Графики берем из recharts
 import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer 
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer,PolarRadiusAxis, Tooltip
 } from 'recharts';
 
 const CRITERIA_CONFIG = {
@@ -30,44 +30,65 @@ export default function GrantAnalysisDashboard({ data,isDark }) {
     subject: c.label,
     A: c.score,
     fullMark: 10,
+    explanation: c.explanation
   }));
 
   // 2. Логика подсветки текста (разбиваем строку на части)
-  const highlightedContent = useMemo(() => {
-    if (!original_text) return null;
+ const highlightedContent = useMemo(() => {
+  if (!original_text) return null;
+  
+  // 1. Создаем массив объектов с позициями всех найденных проблем
+  let fragments = [{ text: original_text, isIssue: false }];
+
+  found_issues.forEach((issue) => {
+    const nextFragments = [];
     
-    let parts = [original_text];
-    found_issues.forEach((issue) => {
-      const newParts = [];
-      parts.forEach(part => {
-        if (typeof part !== 'string') {
-          newParts.push(part);
-          return;
-        }
-        const split = part.split(issue.phrase);
-        for (let i = 0; i < split.length; i++) {
-          newParts.push(split[i]);
-          if (i < split.length - 1) {
-            newParts.push(
-              <mark
-                key={issue.phrase + i}
-                onClick={() => setSelectedIssue(issue)}
-                className={`cursor-pointer px-1 rounded transition-all border-b-2 ${
-                  selectedIssue?.phrase === issue.phrase 
-                  ? 'bg-blue-300 border-blue-700' 
-                  : 'bg-amber-100 border-amber-400 hover:bg-amber-200'
-                }`}
-              >
-                {issue.phrase}
-              </mark>
-            );
-          }
+    fragments.forEach(fragment => {
+      if (fragment.isIssue) {
+        nextFragments.push(fragment);
+        return;
+      }
+
+      const parts = fragment.text.split(issue.phrase);
+      parts.forEach((part, index) => {
+        if (part) nextFragments.push({ text: part, isIssue: false });
+        
+        // Если это не последний кусок, значит между ними была фраза-проблема
+        if (index < parts.length - 1) {
+          nextFragments.push({ 
+            text: issue.phrase, 
+            isIssue: true, 
+            issueData: issue 
+          });
         }
       });
-      parts = newParts;
     });
-    return parts;
-  }, [original_text, found_issues, selectedIssue]);
+    fragments = nextFragments;
+  });
+
+  // 2. Рендерим фрагменты в JSX
+  return fragments.map((frag, i) => {
+    if (!frag.isIssue) return <span key={i}>{frag.text}</span>;
+
+    const isSelected = selectedIssue?.phrase === frag.issueData.phrase;
+
+    return (
+      <mark
+        key={i}
+        onClick={() => setSelectedIssue(frag.issueData)}
+        className={`
+          cursor-pointer px-1 rounded-md transition-all duration-200 border-b-2
+          ${isSelected 
+            ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-[0_0_10px_var(--accent)]/30' 
+            : 'bg-amber-500/20 text-[var(--foreground)] border-amber-500/50 hover:bg-amber-500/30'
+          }
+        `}
+      >
+        {frag.text}
+      </mark>
+    );
+  });
+}, [original_text, found_issues, selectedIssue]);
 
   return (
    <div className="flex flex-col h-screen bg-[var(--background)] transition-colors duration-300">
@@ -116,21 +137,63 @@ export default function GrantAnalysisDashboard({ data,isDark }) {
         <h3 className="text-[11px] font-black text-[var(--muted)] mb-6 uppercase tracking-widest">Баланс критериев</h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart data={radarData}>
-              <PolarGrid stroke="var(--card-border)" />
-              <PolarAngleAxis 
-                dataKey="subject" 
-                tick={{fontSize: 10, fill: 'var(--muted)', fontWeight: 700}} 
-              />
-              <Radar 
-                name="Score" 
-                dataKey="A" 
-                stroke="var(--accent)" 
-                fill="var(--accent)" 
-                fillOpacity={isDark ? 0.3 : 0.5} 
-              />
-            </RadarChart>
-          </ResponsiveContainer>
+          <RadarChart data={radarData}> {/* Используем наш преобразованный массив */}
+            <PolarGrid stroke="var(--card-border)" />
+            <PolarAngleAxis 
+              dataKey="subject" 
+              tick={{fontSize: 10, fill: 'var(--muted)', fontWeight: 700}} 
+            />
+            <Tooltip 
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  const data = payload[0].payload;
+                  return (
+                   <div className="bg-card/95 backdrop-blur-sm p-3 border border-border rounded-xl shadow-xl max-w-[240px] animate-in fade-in zoom-in duration-200">
+                      {/* Заголовок с индикатором балла */}
+                      <div className="flex items-center justify-between mb-2 gap-4">
+                        <span className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">
+                          {data.subject}
+                        </span>
+                        <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          data.A >= 8 ? 'bg-emerald-500/10 text-emerald-500' : 
+                          data.A >= 5 ? 'bg-amber-500/10 text-amber-500' : 
+                          'bg-rose-500/10 text-rose-500'
+                        }`}>
+                          {data.A}/10
+                        </div>
+                      </div>
+
+                      {/* Разделитель */}
+                      <div className="h-[1px] w-full bg-border/50 mb-2" />
+
+                      {/* Текст объяснения */}
+                      <p className="text-sm leading-relaxed text-foreground/90">
+                        {data.explanation}
+                      </p>
+                      
+                      {/* Декоративный элемент снизу */}
+                      <div className="mt-2 flex items-center gap-1 text-[10px] text-muted-foreground/60 italic">
+                        <div className="w-1 h-1 rounded-full bg-accent" />
+                        AI Analysis
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
+            
+            <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
+            
+            <Radar 
+              name="Балл" 
+              dataKey="A" 
+              stroke="var(--accent)" 
+              fill="var(--accent)" 
+              fillOpacity={isDark ? 0.3 : 0.5} 
+            />
+          </RadarChart>
+        </ResponsiveContainer>
         </div>
       </div>
 

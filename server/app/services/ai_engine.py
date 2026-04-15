@@ -233,11 +233,13 @@ async def analyze_full_document(text: str):
     prompt = f"""
     Проанализируй текст научного ТЗ. Найди все слабые места, размытые формулировки и логические ошибки.
     
-    Для каждой ошибки верни:
-    1. "phrase": точная фраза из текста.
-    2. "replacement": конкретное SMART-решение.
-    3. "category": тип ошибки (Measurability, Precision, Evidence, Accountability, Time-bound).
-    4. "criterion": строго одно из ID критериев: [goals_tasks, scientific_novelty, practical_applicability, expected_results, socio_economic_effect, feasibility, strategic_relevance].
+    ДЛЯ КАЖДОЙ ОШИБКИ:
+        1. "phrase": СТРОГО идентичная цитата из текста (символ в символ, без смены падежа).
+        2. "replacement": конкретное SMART-исправление с цифрами/сроками.
+        3. "category": строго из списка: [Measurability, Precision, Evidence, Accountability, Time-bound].
+        4. "criterion": строго из списка ID: [goals_tasks, scientific_novelty, practical_applicability, expected_results, socio_economic_effect, feasibility, strategic_relevance].
+
+    Количественный лимит: Итоговый список found_issues должен содержать не менее 10 объектов. Если текст короткий, ищи мельчайшие неточности, но выполни норму.
 
     Текст ТЗ:
     {text}
