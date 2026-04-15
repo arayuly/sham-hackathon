@@ -5,10 +5,10 @@ from dotenv import load_dotenv
 from groq import AsyncGroq
 
 load_dotenv()
-# Вставьте ваш API ключ или настройте через переменные окружения
+
 client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
 
-# Используем одну из самых быстрых моделей
+
 MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 
 
